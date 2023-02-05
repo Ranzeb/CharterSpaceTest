@@ -1,26 +1,38 @@
-import { z } from 'zod';
+import { string, z, ZodTypeDef } from 'zod';
 import { Types, Schema } from 'mongoose';
 
 
 
 const hexString = "3614b7d78bca5b671295e804";
-
-
+/*
   const NodeData = z.object({
-    _id: z.union([z.string(), z.instanceof(Schema.Types.ObjectId)]),
+    _id: z.union([z.string(), z.instanceof(Types.ObjectId)]),//z.string().or(z.instanceof(Types.ObjectId)),
     coordinateX: z.number() || undefined,
     coordinateY: z.number() || undefined
   });
+*/
+
+const NodeData = (): z.Schema<any, ZodTypeDef, Types.ObjectId | string> =>
+  z
+    .instanceof(Types.ObjectId)
+    .or(z.string())
+    .transform((val) => {
+      const parsed = val instanceof Types.ObjectId ? val : Types.ObjectId.createFromHexString(val);
+      return parsed;
+    });
+
+  
 
   const User = z.object({
     username: z.string(),
   });
   
-  const Node = NodeData.parse({ _id: "Ludwig", coordinateX: 1, coordinateY: 2 });
+  const Node = NodeData.parse({ _id: "Ludwig"});
   const NodeObjectId = NodeData.parse({_id: Types.ObjectId.createFromHexString(hexString), coordinateX: 10, coordinateY: 200});
 
+ 
+  console.log(NodeObjectId);
   console.log(Node);
-  //console.log(NodeObjectId);
   // extract the inferred type
   type User = z.infer<typeof User>;
 
