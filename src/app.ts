@@ -1,9 +1,6 @@
-import { string, z, ZodTypeDef } from 'zod';
-import { Types, Schema } from 'mongoose';
-
-
-
-const hexString = "3614b7d78bca5b671295e804";
+import { string, z, ZodType, ZodTypeDef } from 'zod';
+import { ObjectId } from 'bson';
+import { type } from 'os';
 /*
   const NodeData = z.object({
     _id: z.union([z.string(), z.instanceof(Types.ObjectId)]),//z.string().or(z.instanceof(Types.ObjectId)),
@@ -12,59 +9,92 @@ const hexString = "3614b7d78bca5b671295e804";
   });
 */
 
-const NodeData = (): z.Schema<any, ZodTypeDef, Types.ObjectId | string> =>
-  z
-    .instanceof(Types.ObjectId)
-    .or(z.string())
-    .transform((val) => {
-      const parsed = val instanceof Types.ObjectId ? val : Types.ObjectId.createFromHexString(val);
+/* z.instanceof(ObjectId).or(z.string().transform((val) => {
+  return ObjectId.createFromHexString(val);
+
+})) */
+
+const NodeStringType = z.object({
+  val: z.instanceof(ObjectId)
+    .or(z.string()).transform((val) => {
+      const parsed = val instanceof ObjectId ? val : ObjectId.createFromHexString(val);
       return parsed;
-    });
+    })
+})
 
-  
 
-  const User = z.object({
-    username: z.string(),
-  });
-  
-  const Node = NodeData.parse({ _id: "Ludwig"});
-  const NodeObjectId = NodeData.parse({_id: Types.ObjectId.createFromHexString(hexString), coordinateX: 10, coordinateY: 200});
 
- 
-  console.log(NodeObjectId);
-  console.log(Node);
-  // extract the inferred type
-  type User = z.infer<typeof User>;
+const NodeData = (): z.ZodType<ObjectId | undefined, ZodTypeDef, ObjectId | undefined> =>
+  z
+    .instanceof(ObjectId)
 
-  
-  //User.parse({ username: "Ludwig" });
-  
-  // extract the inferred type
-  //type User = z.infer<typeof NodeData>;
+/*
+const NodeDataType = z.object({
+  //_id: z.instanceof(ObjectId).or(z.string().transform((val) => { return ObjectId.createFromHexString(val) })).or(z.undefined())
+  _id: z.instanceof(ObjectId).or(z.undefined())
+})
 
-  type correctType = z.infer<typeof NodeData>
-  type correctInputType = z.input<typeof NodeData>
-  type correctOutputType = z.output<typeof NodeData>
-  // all 3 of them should emit:
-  // {
-  // ...<other arbitrary attributes>...
-  // _id?: ObjectId | undefined;
-  // }
-  //both invocations should not fail
- 
- /*
-  const actualNodeDataFromString = NodeData.parse({
-    _id: "random hex string here"
-  })
 */
-/*  console.log(actualNodeDataFromString);
 
-  const actualNodeDataFromObjectId = NodeData.parse({
-    _id: Types.ObjectId.createFromHexString("hex string here")
-  })*/
 
-  //both invocations should return something that emits
-  // {
-  // ...
-  // _id?: ObjectId | undefined;
-  // }
+const NodeInput = z.object({
+  value: z.instanceof(ObjectId).or(z.coerce.string().transform((val) => { return ObjectId.createFromHexString(val) })).or(z.undefined())
+})
+
+const stringTypeCheck = z.preprocess(arg => typeof arg == 'string' ? ObjectId.createFromHexString(arg) : arg, z.instanceof(ObjectId))
+type correctStringType = z.input<typeof stringTypeCheck>
+//const stringTypeCheck = z.string().transform((val) => { return ObjectId.createFromHexString(val) })
+
+const objectString = (schema: z.ZodTypeAny) =>
+  z.preprocess((a) => {
+    if (typeof a === 'string') {
+      return ObjectId.createFromHexString(a)
+    } else {
+      return a;
+    }
+  }, schema) as z.ZodEffects<z.ZodTypeAny, ObjectId | undefined, ObjectId | undefined>;
+
+const stringObj: z.ZodType<ObjectId | undefined, z.ZodTypeDef, string | undefined> = z.string().transform((val) => { return ObjectId.createFromHexString(val) })
+
+const stringObjSchema = z.object({
+  //_id: z.instanceof(ObjectId).or(stringTypeCheck).or(z.undefined())
+  _id: z.instanceof(ObjectId).or(z.string().transform((val) => { return ObjectId.createFromHexString(val) })).or(z.undefined())
+})
+
+const test: z.ZodType<ObjectId | undefined, z.ZodTypeDef, ObjectId | string | undefined> = z.instanceof(ObjectId).or(z.string().transform((val) => { return ObjectId.createFromHexString(val) })).or(z.undefined())
+
+type test = z.output<typeof stringObjSchema>
+
+const schema: z.Schema<Input, z.ZodTypeDef, test> = z.object({
+  _id: z.instanceof(ObjectId).or(z.undefined()).or(stringObj)
+})
+
+const NodeDataType = z.object({
+  //_id: z.instanceof(ObjectId).or(stringTypeCheck).or(z.undefined())
+  _id: z.preprocess((arg) => typeof arg == 'string' ? ObjectId.createFromHexString(arg) : arg, z.instanceof(ObjectId)).or(z.undefined())
+})
+
+const testRefine = z.object({
+  _id: z.instanceof(ObjectId).or(z.string().min(24).transform((val) => {
+    return ObjectId.createFromHexString(val);
+  }))
+})
+
+
+
+
+const hexString = "be5d55129807e725bda1b061";
+const hexString2 = "ciao";
+
+type correctType = z.infer<typeof testRefine>
+type correctInputType = z.input<typeof testRefine>
+type correctOutputType = z.output<typeof testRefine>
+
+const actualNodeDataFromObjectId = testRefine.parse({
+  _id: ObjectId.createFromHexString(hexString)
+})
+
+const actualNodeDataFromString = testRefine.parse({
+  _id: hexString2
+})
+
