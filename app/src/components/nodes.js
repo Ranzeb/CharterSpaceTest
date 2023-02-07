@@ -1,7 +1,9 @@
+import ReactFlow, { ReactFlowProvider, Background, Edge, Position } from 'reactflow';
+
 const nodes = [
     {
         id: 'A',
-        type: 'group',
+        type: 'resizeRotate',
         data: { label: null },
         position: { x: 0, y: 0 },
         style: {
@@ -15,7 +17,7 @@ const nodes = [
         data: { label: 'child node 1' },
         position: { x: 50, y: 50 },
         parentNode: 'A',
-        extent: 'parent',
+        expandParent: true,
     },
     {
         id: 'C',
@@ -23,8 +25,8 @@ const nodes = [
         data: { label: 'child node 2' },
         position: { x: 100, y: 140 },
         parentNode: 'A',
-        extent: 'parent',
-    },
+        expandParent: true,
+    }
 ];
 
 export default nodes;

@@ -30,40 +30,19 @@ function Flow() {
         [setEdges]
     );
 
-    const onResize = useCallback(
-        (event, node) => {
-            console.log("resize called")
-            let groupNode = node;
-            console.log(node.type, node.id);
-            if (node.type !== "resizeRotate" || node.id !== "A") return;
-
-            nodes.forEach((nds) => {
-                if (nds.type !== "resizeRotate" || node.id !== "A") {
-                    if ((nds.position.x + nds.width) >= (groupNode.position.x + groupNode.width)) {
-                        nds.position.x -= 10;
-                    }
-                }
-            });
-
-
-
-        }, [nodes, setNodes]
-    );
-
     const resizeFactor = 3;
     const handleDragEnd = useCallback(
         (event, node) => {
             let groupNode = node;
             console.log(node.type, node.id);
-            if (node.type === "resizeRotate" || node.id === "A") return;
+            if (node.type === "group" || node.id === "A") return;
 
             nodes.forEach((nds) => {
-                if (nds.type === "resizeRotate" || node.id === "A") {
+                if (nds.type === "group" || node.id === "A") {
                     groupNode = nds;
                 }
             });
 
-            /*
             console.log("current node pos: ", node.position.x, node.position.y, node.width, node.height);
             console.log("current group pos: ", groupNode.position.x, groupNode.position.y, groupNode.width, groupNode.height);
             if ((node.position.x + node.width) >= (groupNode.width - resizeFactor)) {
@@ -83,7 +62,7 @@ function Flow() {
                 groupNode.style = { width: newWidth, height: newHeight }
                 console.log("new width height: ", groupNode.width, groupNode.height);
             }
-*/
+
             //if (node.height) node.height += 10;
             if (groupNode.id !== node.id) {
                 setNodes((prevNodes) => {
@@ -95,6 +74,23 @@ function Flow() {
                                 x: node.positionAbsolute?.x - groupNode.position.x,
                                 y: node.positionAbsolute?.y - groupNode.position.y
                             };
+                        }
+                        return nds;
+                    });
+                });
+            } else {
+                console.log("out");
+                setNodes((prevNodes) => {
+                    return prevNodes.map((nds) => {
+                        if (nds.id === node.id) {
+                            nds.parentNode = undefined;
+                            nds.position = node.positionAbsolute;
+                            if (groupNode.height) {
+                                console.log(groupNode);
+                                groupNode.height = 400;
+                                console.log(groupNode.height);
+                                console.log(groupNode);
+                            }
                         }
                         return nds;
                     });
@@ -111,6 +107,7 @@ function Flow() {
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onNodeDrag={handleDragEnd}
             onConnect={onConnect}
             fitView
             style={rfStyle}

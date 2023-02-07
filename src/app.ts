@@ -1,6 +1,27 @@
-import { string, z, ZodType, ZodTypeDef } from 'zod';
+import { z, ZodTypeDef } from 'zod';
 import { ObjectId } from 'bson';
-import { type } from 'os';
+
+const mySchema = z.object({
+  //_id: z.instanceof(ObjectId).or(stringTypeCheck).or(z.undefined())
+  _id: z.instanceof(ObjectId).or(z.undefined()).or(z.string().transform((val) => { return ObjectId.createFromHexString(val) }))
+})
+
+const hexString = "be5d55129807e725bda1b061";
+
+type correctType = z.infer<typeof mySchema>
+type correctInputType = z.input<typeof mySchema>
+type correctOutputType = z.output<typeof mySchema>
+
+
+const actualNodeDataFromObjectId = mySchema.parse({
+  _id: ObjectId.createFromHexString(hexString)
+})
+
+const actualNodeDataFromString = mySchema.parse({
+  _id: hexString
+})
+
+
 /*
   const NodeData = z.object({
     _id: z.union([z.string(), z.instanceof(Types.ObjectId)]),//z.string().or(z.instanceof(Types.ObjectId)),
@@ -56,10 +77,6 @@ const objectString = (schema: z.ZodTypeAny) =>
 
 const stringObj: z.ZodType<ObjectId | undefined, z.ZodTypeDef, string | undefined> = z.string().transform((val) => { return ObjectId.createFromHexString(val) })
 
-const stringObjSchema = z.object({
-  //_id: z.instanceof(ObjectId).or(stringTypeCheck).or(z.undefined())
-  _id: z.instanceof(ObjectId).or(z.string().transform((val) => { return ObjectId.createFromHexString(val) })).or(z.undefined())
-})
 
 const test: z.ZodType<ObjectId | undefined, z.ZodTypeDef, ObjectId | string | undefined> = z.instanceof(ObjectId).or(z.string().transform((val) => { return ObjectId.createFromHexString(val) })).or(z.undefined())
 
@@ -78,24 +95,5 @@ const testRefine = z.object({
   _id: z.instanceof(ObjectId).or(z.string().min(24).transform((val) => {
     return ObjectId.createFromHexString(val);
   }))
-})
-
-
-
-
-
-const hexString = "be5d55129807e725bda1b061";
-const hexString2 = "ciao";
-
-type correctType = z.infer<typeof testRefine>
-type correctInputType = z.input<typeof testRefine>
-type correctOutputType = z.output<typeof testRefine>
-
-const actualNodeDataFromObjectId = testRefine.parse({
-  _id: ObjectId.createFromHexString(hexString)
-})
-
-const actualNodeDataFromString = testRefine.parse({
-  _id: hexString2
 })
 
