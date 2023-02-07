@@ -1,12 +1,13 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import CollisionDetectionFlow from './components/Flow';
+import Flow from './components/Flow';
+
 
 function App() {
   return (
     <>
-      <CollisionDetectionFlow />
+      <Flow />
     </>
   );
 }
