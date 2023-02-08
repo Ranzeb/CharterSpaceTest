@@ -2,8 +2,8 @@ import { useCallback, useState } from 'react';
 import ReactFlow, { addEdge, applyEdgeChanges, applyNodeChanges, Background } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import initialNodes from './nodes.js';
-import initialEdges from './edges.js';
+import initialNodes from './Nodes.js';
+import initialEdges from './Edges.js';
 import ResizeRotateNode from './ResizeRotateNode';
 
 const rfStyle = {

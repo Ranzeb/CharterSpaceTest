@@ -1,5 +1,3 @@
-import ReactFlow, { ReactFlowProvider, Background, Edge, Position } from 'reactflow';
-
 const nodes = [
     {
         id: 'A',
