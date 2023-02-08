@@ -3,14 +3,10 @@
     height: 100%;
     border-radius: 15px;
     border: 1px solid #000;
-    background-color: #fff;
     padding: 20px;
     box-sizing: border-box;
   }
   
-  .edge {
-    color: #000;
-  }
   .node :global .react-flow__resize-control.handle {
     width: 2px;
     height: 2px;

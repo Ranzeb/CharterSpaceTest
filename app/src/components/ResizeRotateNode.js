@@ -11,6 +11,7 @@ export default function ResizeRotateNode() {
     const [resizable, setResizable] = useState(true);
     const [resize, setResize] = useState(false);
     const nodes = useNodes();
+    const resizeFactor = 2;
 
     function checkCollision() {
         let groupNode;
@@ -25,13 +26,13 @@ export default function ResizeRotateNode() {
             // handle intersection between x and y coordinates
             nodes.map((child) => {
                 if (child.type !== "resizeRotate") {
-                    if (child.position.x + child.width >= groupNode.position.x + groupNode.width) {
+                    if ((child.position.x + child.width >= groupNode.position.x + groupNode.width) && (child.position.x > 0)) {
                         child.position.x -= 2;
-                    } else if (child.position.y + child.height >= groupNode.position.y + groupNode.height) {
+                    } else if ((child.position.y + child.height >= groupNode.position.y + groupNode.height) && (child.position.y > 0)) {
                         child.position.y -= 2;
-                    } else if (child.position.y <= groupNode.position.y) {
+                    } else if ((child.position.y <= groupNode.position.y) && (child.position.x < groupNode.position.x + groupNode.width)) {
                         child.position.y += 2;
-                    } else if (child.position.x <= groupNode.position.x) {
+                    } else if ((child.position.x <= groupNode.position.x) && (child.position.y < groupNode.position.y + groupNode.height)) {
                         child.position.x += 2;
                     }
                 }
@@ -58,6 +59,7 @@ export default function ResizeRotateNode() {
             >
                 <NodeResizer isVisible={resizable} minWidth={500} minHeight={500}
                     onResize={onResize}
+                    //onResizeStart={() => setResize(true)}
                     onResizeEnd={() => setResize(false)}
                 />
             </div>

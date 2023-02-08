@@ -5,6 +5,7 @@ import 'reactflow/dist/style.css';
 import initialNodes from './nodes.js';
 import initialEdges from './edges.js';
 import ResizeRotateNode from './ResizeRotateNode';
+
 const rfStyle = {
     backgroundColor: '#D0C0F7',
 };
@@ -28,80 +29,6 @@ function Flow() {
     const onConnect = useCallback(
         (connection) => setEdges((eds) => addEdge(connection, eds)),
         [setEdges]
-    );
-
-    const onResize = useCallback(
-        (event, node) => {
-            console.log("resize called")
-            let groupNode = node;
-            console.log(node.type, node.id);
-            if (node.type !== "resizeRotate" || node.id !== "A") return;
-
-            nodes.forEach((nds) => {
-                if (nds.type !== "resizeRotate" || node.id !== "A") {
-                    if ((nds.position.x + nds.width) >= (groupNode.position.x + groupNode.width)) {
-                        nds.position.x -= 10;
-                    }
-                }
-            });
-
-
-
-        }, [nodes, setNodes]
-    );
-
-    const resizeFactor = 3;
-    const handleDragEnd = useCallback(
-        (event, node) => {
-            let groupNode = node;
-            console.log(node.type, node.id);
-            if (node.type === "resizeRotate" || node.id === "A") return;
-
-            nodes.forEach((nds) => {
-                if (nds.type === "resizeRotate" || node.id === "A") {
-                    groupNode = nds;
-                }
-            });
-
-            /*
-            console.log("current node pos: ", node.position.x, node.position.y, node.width, node.height);
-            console.log("current group pos: ", groupNode.position.x, groupNode.position.y, groupNode.width, groupNode.height);
-            if ((node.position.x + node.width) >= (groupNode.width - resizeFactor)) {
-                const newWidth = groupNode.width + resizeFactor;
-                const newHeight = groupNode.height;
-                groupNode.width = newWidth;
-                groupNode.height = newHeight;
-                groupNode.style = { width: newWidth, height: newHeight }
-                console.log("new width height: ", groupNode.width, groupNode.height);
-                //groupNode.width += 10;
-                //groupNode.style = { width: groupNode.style.width + 10, heigth: groupNode.style.height + 10 }
-            } else if ((node.position.y + node.height) >= (groupNode.height - resizeFactor)) {
-                const newWidth = groupNode.width;
-                const newHeight = groupNode.height + resizeFactor;
-                groupNode.width = newWidth;
-                groupNode.height = newHeight;
-                groupNode.style = { width: newWidth, height: newHeight }
-                console.log("new width height: ", groupNode.width, groupNode.height);
-            }
-*/
-            //if (node.height) node.height += 10;
-            if (groupNode.id !== node.id) {
-                setNodes((prevNodes) => {
-                    return prevNodes.map((nds) => {
-                        if (nds.id === node.id) {
-                            nds.parentNode = groupNode?.id;
-                            nds.extent = "parent";
-                            nds.position = {
-                                x: node.positionAbsolute?.x - groupNode.position.x,
-                                y: node.positionAbsolute?.y - groupNode.position.y
-                            };
-                        }
-                        return nds;
-                    });
-                });
-            }
-        },
-        [nodes, setNodes]
     );
 
     return (
