@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { TypeOf, z } from 'zod';
 import { ObjectId } from 'bson';
 //import NodeDataType from './schema/nodeDataType';
 
@@ -9,13 +9,20 @@ const PreProcessId =
   z.preprocess((arg) => {
     if (typeof arg == "string" && arg.length >= 24) return ObjectId.createFromHexString(arg)
     else if (arg instanceof ObjectId) return arg;
-    else return undefined;
+    else return z.undefined;
   }, z.instanceof(ObjectId).optional()) as z.ZodEffects<z.ZodTypeAny, ObjectId | undefined, ObjectId | undefined>;
 
 
+
 const NodeDataType = z.object({
-  _id: PreProcessId
-});
+  _id: z.custom<ObjectId | undefined>((input) => {
+    if (!(input instanceof ObjectId) && !(typeof input == "string")) return undefined;
+    else if (input instanceof ObjectId) return input;
+    else if (typeof input === "string") return ObjectId.createFromHexString(input);
+  })
+})
+const testCustomInput = z.custom<{ arg: ObjectId }>();
+type testCustomInputType = z.input<typeof testCustomInput>;
 
 type correctType = z.infer<typeof NodeDataType>
 type correctInputType = z.input<typeof NodeDataType>
@@ -26,7 +33,7 @@ const actualNodeDataFromObjectId = NodeDataType.parse({
 })
 
 const actualNodeDataFromString = NodeDataType.parse({
-  _id: hexString
+  _id: "be5d55129807e725bda1b012"
 })
 
 console.log(actualNodeDataFromObjectId);
