@@ -15,14 +15,24 @@ const PreProcessId =
 
 
 const NodeDataType = z.object({
-  _id: z.custom<ObjectId | undefined>((input) => {
-    if (!(input instanceof ObjectId) && !(typeof input == "string")) return undefined;
-    else if (input instanceof ObjectId) return input;
-    else if (typeof input === "string") return ObjectId.createFromHexString(input);
-  })
+  _id: z.custom<ObjectId | undefined>((arg) => {
+    console.log("custom:");
+    console.log(arg);
+    if (typeof arg == "string" && arg.length >= 24) {
+      console.log("stringa")
+      return ObjectId.createFromHexString(arg)
+    }
+    else if (arg instanceof ObjectId) {
+      console.log("ObjectId")
+      return arg;
+    }
+    else {
+      console.log("undefined")
+      return undefined;
+    }
+  }, "Invalid ObjectId, should be an hex string or ObjectId type")
 })
-const testCustomInput = z.custom<{ arg: ObjectId }>();
-type testCustomInputType = z.input<typeof testCustomInput>;
+
 
 type correctType = z.infer<typeof NodeDataType>
 type correctInputType = z.input<typeof NodeDataType>
@@ -33,7 +43,7 @@ const actualNodeDataFromObjectId = NodeDataType.parse({
 })
 
 const actualNodeDataFromString = NodeDataType.parse({
-  _id: "be5d55129807e725bda1b012"
+  _id: "be5d55129807e725bda1b061"
 })
 
 console.log(actualNodeDataFromObjectId);
